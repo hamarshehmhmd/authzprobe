@@ -135,12 +135,14 @@ class Stack:
                      'db-channel-enabled = true\n')
         log = open(os.path.join(self.dir, "postgrest.log"), "w")
         self.procs.append(subprocess.Popen([self.postgrest_bin, conf], stdout=log, stderr=log))
-        for _ in range(100):
+        for _ in range(300):
             try:
                 urllib.request.urlopen(self.rest_url + "/", timeout=1)
                 return
-            except urllib.error.HTTPError:
-                return
+            except urllib.error.HTTPError as e:
+                if e.code not in (502, 503):
+                    return  # up, schema cache loaded (401/403 are fine)
+                time.sleep(0.1)
             except Exception:
                 time.sleep(0.1)
         raise RuntimeError("postgrest did not start: " + open(os.path.join(self.dir, "postgrest.log")).read())

@@ -51,19 +51,21 @@ def _matrix(result, w, on):
         notes = []
         for name in sorted(tables):
             c = tables[name]
+            pub = bool(c.get("public"))
+            con = on and not pub   # public-by-config rows are shown dim, not red
             rows = c.get("rows")
             line = f"{name:<{width}}{('-' if rows is None else str(rows)):>6}   "
             for actor in ("anon", "user A"):
-                seen = _seen(c.get(f"{actor} read"), on)
+                seen = _seen(c.get(f"{actor} read"), con)
                 vis = len(str(c.get(f"{actor} read"))) if isinstance(c.get(f"{actor} read"), int) else (
                     6 if str(c.get(f"{actor} read", "")).startswith("denied") else 1)
-                cells = "".join(_cell(c.get(f"{actor} {k}"), L, on) for k, L in
+                cells = "".join(_cell(c.get(f"{actor} {k}"), L, con) for k, L in
                                 (("read B's row", "R"), ("insert as B", "I"), ("update B's row", "U"),
                                  ("delete B's row", "D")))
                 pad = (6 if actor == "anon" else 8) + 6 - vis
                 line += " " * pad + seen + "  " + cells + "    "
-            if c.get("public"):
-                line += _c("public by config", "2", on)
+            if pub:
+                line = _c(line + "public by config", "2", on)
             tu = str(c.get("two-user", ""))
             if tu.startswith("skipped"):
                 notes.append(f"{name}: two-user test {tu}")

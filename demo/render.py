@@ -83,8 +83,8 @@ SCENES = [
     },
     {
         "kind": "term",
-        "cmds": ["psql -q -f examples/vibeapp/fixed.sql", "authzprobe scan --public posts --brief --no-storage",
-                 "echo exit=$?"],
+        "cmds": ["psql -q -f examples/vibeapp/fixed.sql",
+                 "authzprobe scan --public posts --brief --no-storage; echo \"exit code: $?\""],
         "say": ("Apply the fixes and scan again. Every check is denied now, and the exit code is zero, so it can "
                 "gate a deploy."),
     },
