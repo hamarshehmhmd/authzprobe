@@ -1,0 +1,57 @@
+name: authzprobe
+description: Behavioral RLS tests for Supabase apps. Anon and two throwaway users try to read, change and delete each other's rows.
+author: Mohammad Hamarsheh
+branding:
+  icon: lock
+  color: red
+inputs:
+  url:
+    description: Supabase project URL (use a staging/branch project, or `supabase start` in CI)
+    required: true
+  anon-key:
+    description: anon / sb_publishable_ key
+    required: true
+  service-key:
+    description: service_role / sb_secret_ key (reads the schema, creates 2 throwaway users, seeds and cleans up test rows)
+    required: false
+    default: ""
+  jwt-secret:
+    description: legacy JWT secret, instead of service-key (mints test-user tokens)
+    required: false
+    default: ""
+  public:
+    description: comma-separated tables that are meant to be world-readable
+    required: false
+    default: ""
+  fail-on:
+    description: fail the step at this severity or worse (critical, high, medium, low, info, never)
+    required: false
+    default: high
+  args:
+    description: extra arguments for `authzprobe scan`
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: "3.12"
+    - shell: bash
+      run: python -m pip install --quiet "${{ github.action_path }}"
+    - shell: bash
+      env:
+        SUPABASE_URL: ${{ inputs.url }}
+        SUPABASE_ANON_KEY: ${{ inputs.anon-key }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ inputs.service-key }}
+        SUPABASE_JWT_SECRET: ${{ inputs.jwt-secret }}
+        AP_PUBLIC: ${{ inputs.public }}
+        AP_FAIL_ON: ${{ inputs.fail-on }}
+        AP_ARGS: ${{ inputs.args }}
+      run: |
+        set -o pipefail
+        extra=()
+        [ -n "$AP_PUBLIC" ] && extra+=(--public "$AP_PUBLIC")
+        [ -z "$SUPABASE_SERVICE_ROLE_KEY$SUPABASE_JWT_SECRET" ] && extra+=(--i-own-this)
+        # shellcheck disable=SC2086
+        authzprobe scan --format github --fail-on "$AP_FAIL_ON" "${extra[@]}" $AP_ARGS

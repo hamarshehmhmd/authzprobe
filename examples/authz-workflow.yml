@@ -1,0 +1,13 @@
+name: authz
+on: [pull_request]
+jobs:
+  rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hamarshehmhmd/authzprobe@v0.1.0
+        with:
+          url: ${{ secrets.STAGING_SUPABASE_URL }}
+          anon-key: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          service-key: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+          public: posts
+          fail-on: high

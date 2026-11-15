@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "authzprobe"
+version = "0.1.0"
+description = "Prove user A can't read user B's data in your Supabase app. Behavioral authorization tests for row-level security: anon and two throwaway users try to read, change and delete each other's rows, with fix SQL and a regression test."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "Mohammad Hamarsheh" }]
+keywords = ["supabase", "rls", "row-level-security", "postgrest", "authorization", "security", "idor", "vibe-coding", "lovable"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+  "Topic :: Database",
+  "Intended Audience :: Developers",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/hamarshehmhmd/authzprobe"
+Issues = "https://github.com/hamarshehmhmd/authzprobe/issues"
+
+[project.scripts]
+authzprobe = "authzprobe.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
